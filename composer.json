@@ -9,6 +9,5 @@
     }
 ]
 "require": {
-    "php": ">=5.3",
-    "SoapClient": "*",
+    "php": ">=5.3"
 }
