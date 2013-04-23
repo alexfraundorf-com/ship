@@ -8,7 +8,7 @@
             "name": "Alex Fraundorf",
             "homepage": "http://alexfraundorf.com"
         }
-    ]
+    ],
     "require": {
         "php": ">=5.3"
     }
