@@ -1,0 +1,117 @@
+<wsdl:definitions name="PaperlessDocumentAPI" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:error="http://www.ups.com/XMLSchema/XOLTWS/Error/v1.1" xmlns:upss="http://www.ups.com/XMLSchema/XOLTWS/UPSS/v1.0" xmlns:common="http://www.ups.com/XMLSchema/XOLTWS/Common/v1.0" xmlns:da="http://www.ups.com/XMLSchema/XOLTWS/PaperlessDocumentAPI/v1.0" xmlns="http://www.ups.com/XMLSchema/XOLTWS/PaperlessDocumentAPI/v1.0" xmlns:tns="http://www.ups.com/WSDL/XOLTWS/PaperlessDocumentAPI/v1.0" targetNamespace="http://www.ups.com/WSDL/XOLTWS/PaperlessDocumentAPI/v1.0">
+	<wsdl:types>
+		<xsd:schema>
+			<!-- This schema defines the UPS Security header used for authorization purposes -->
+			<xsd:import namespace="http://www.ups.com/XMLSchema/XOLTWS/UPSS/v1.0" schemaLocation="UPSSecurity.xsd"/>
+			<!-- This schema defines the common data types -->
+			<xsd:import namespace="http://www.ups.com/XMLSchema/XOLTWS/Common/v1.0" schemaLocation="common.xsd"/>
+			<!--  This schema defines the error detail data types returned within SOAPFaults to provide more specific information pertaining to the problem. -->
+			<xsd:import namespace="http://www.ups.com/XMLSchema/XOLTWS/Error/v1.1" schemaLocation="Error1.1.xsd"/>
+			<!-- This schema defines the Paperless Document API  data types. -->
+			<xsd:import namespace="http://www.ups.com/XMLSchema/XOLTWS/PaperlessDocumentAPI/v1.0" schemaLocation="PaperlessDocumentAPI.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="UploadRequestMessage">
+		<wsdl:part name="Body" element="da:UploadRequest"/>
+		<wsdl:part name="UPSSecurity" element="upss:UPSSecurity"/>
+	</wsdl:message>
+	<wsdl:message name="UploadResponseMessage">
+		<wsdl:part name="Body" element="da:UploadResponse"/>
+	</wsdl:message>
+	<wsdl:message name="UploadErrorMessage">
+		<wsdl:part name="UploadError" element="error:Errors"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteRequestMessage">
+		<wsdl:part name="Body" element="da:DeleteRequest"/>
+		<wsdl:part name="UPSSecurity" element="upss:UPSSecurity"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteResponseMessage">
+		<wsdl:part name="Body" element="da:DeleteResponse"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteErrorMessage">
+		<wsdl:part name="DeleteError" element="error:Errors"/>
+	</wsdl:message>
+	<wsdl:message name="PushToImageRepositoryRequestMessage">
+		<wsdl:part name="Body" element="da:PushToImageRepositoryRequest"/>
+		<wsdl:part name="UPSSecurity" element="upss:UPSSecurity"/>
+	</wsdl:message>
+	<wsdl:message name="PushToImageRepositoryResponseMessage">
+		<wsdl:part name="Body" element="da:PushToImageRepositoryResponse"/>
+	</wsdl:message>
+	<wsdl:message name="PushToImageRepositoryErrorMessage">
+		<wsdl:part name="PushToImageRepositoryError" element="error:Errors"/>
+	</wsdl:message>
+	<wsdl:portType name="PaperlessDocumentAPIPortType">
+		<wsdl:operation name="ProcessUploading">
+			<wsdl:input name="UploadRequest" message="tns:UploadRequestMessage"/>
+			<wsdl:output name="UploadResponse" message="tns:UploadResponseMessage"/>
+			<wsdl:fault name="UploadError" message="tns:UploadErrorMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="ProcessDeleting">
+			<wsdl:input name="DeleteRequest" message="tns:DeleteRequestMessage"/>
+			<wsdl:output name="DeleteResponse" message="tns:DeleteResponseMessage"/>
+			<wsdl:fault name="DeleteError" message="tns:DeleteErrorMessage"/>
+		</wsdl:operation>
+		<wsdl:operation name="ProcessPushToImageRepository">
+			<wsdl:input name="PushToImageRepositoryRequest" message="tns:PushToImageRepositoryRequestMessage"/>
+			<wsdl:output name="PushToImageRepositoryResponse" message="tns:PushToImageRepositoryResponseMessage"/>
+			<wsdl:fault name="PushToImageRepositoryError" message="tns:PushToImageRepositoryErrorMessage"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="PaperlessDocumentAPIBinding" type="tns:PaperlessDocumentAPIPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="ProcessUploading">
+			<soap:operation soapAction="http://onlinetools.ups.com/webservices/PaperlessDocumentAPIBinding/v1.0" style="document"/>
+			<wsdl:input name="UploadRequest">
+				<soap:body parts="Body" use="literal"/>
+				<soap:header message="tns:UploadRequestMessage" part="UPSSecurity" use="literal">
+					<soap:headerfault message="tns:UploadErrorMessage" part="UploadError" use="literal"/>
+				</soap:header>
+			</wsdl:input>
+			<wsdl:output name="UploadResponse">
+				<soap:body parts="Body" use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="UploadError">
+				<soap:fault name="UploadError" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="ProcessDeleting">
+			<soap:operation soapAction="http://onlinetools.ups.com/webservices/PaperlessDocumentAPIBinding/v1.0" style="document"/>
+			<wsdl:input name="DeleteRequest">
+				<soap:body parts="Body" use="literal"/>
+				<soap:header message="tns:DeleteRequestMessage" part="UPSSecurity" use="literal">
+					<soap:headerfault message="tns:DeleteErrorMessage" part="DeleteError" use="literal"/>
+				</soap:header>
+			</wsdl:input>
+			<wsdl:output name="DeleteResponse">
+				<soap:body parts="Body" use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="DeleteError">
+				<soap:fault name="DeleteError" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="ProcessPushToImageRepository">
+			<soap:operation soapAction="http://onlinetools.ups.com/webservices/PaperlessDocumentAPIBinding/v1.0" style="document"/>
+			<wsdl:input name="PushToImageRepositoryRequest">
+				<soap:body parts="Body" use="literal"/>
+				<soap:header message="tns:PushToImageRepositoryRequestMessage" part="UPSSecurity" use="literal">
+					<soap:headerfault message="tns:PushToImageRepositoryErrorMessage" part="PushToImageRepositoryError" use="literal"/>
+				</soap:header>
+			</wsdl:input>
+			<wsdl:output name="PushToImageRepositoryResponse">
+				<soap:body parts="Body" use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="PushToImageRepositoryError">
+				<soap:fault name="PushToImageRepositoryError" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="PaperlessDocumentAPIService">
+		<wsdl:port name="PaperlessDocumentAPIPort" binding="tns:PaperlessDocumentAPIBinding">
+			<!-- Production URL -->
+			<!--<soap:address location="https://onlinetools.ups.com/webservices/PaperlessDocumentAPI"/>-->
+			<!-- CIE -->
+			<soap:address location="https://wwwcie.ups.com/webservices/PaperlessDocumentAPI"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

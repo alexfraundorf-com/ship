@@ -1,0 +1,14 @@
+"name": "awsp/ship",
+"description": "A shipping abstraction library written in PHP",
+"homepage": "https://github.com/alexfraundorf-com/ship",
+"license": "MIT",
+"authors": [
+    {
+        "name": "Alex Fraundorf",
+        "homepage": "http://alexfraundorf.com"
+    }
+]
+"require": {
+    "php": ">=5.3",
+    "SoapClient": "*",
+}
