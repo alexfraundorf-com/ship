@@ -1,9 +1,9 @@
 Copyright (c) 2012-2013 Alex Fraundorf and AffordableWebSitePublishing.com LLC
 
-This readme file was updated on 04/19/2013.
+This readme file was updated on 04/24/2013.
 
-This package was written for the article published on PHPmaster.com.  Please see the article for 
-a detailed explanation of the package.
+This package was written for the article published on PHPmaster.com (http://phpmaster.com/abstracting-shipping-apis/).
+Please see the article for a detailed explanation of the package and how to use it.
 
 -------------------------------------------------------------------------------------------------------
 
