@@ -191,7 +191,7 @@ class Ups implements ShipperInterface {
             $data['Dimensions']['Width'] = ceil($package->Get('width'));
             $data['Dimensions']['Height'] = ceil($package->Get('height'));
             // set the package's unit of weight (pounds are the default unit)
-            if($this->config['dimension_unit'] == 'KG') {
+            if($this->config['weight_unit'] == 'KG') {
                 $data['PackageWeight']['UnitOfMeasurement']['Code'] = 'KGS';
             }
             else {
