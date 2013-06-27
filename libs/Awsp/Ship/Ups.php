@@ -50,10 +50,14 @@ class Ups implements ShipperInterface {
         '01' => 'Next Day Air',
         '02' => '2nd Day Air',
         '03' => 'Ground',
+        '07' => 'Worldwide Express',
+        '08' => 'Worldwide Expeditor',
+        '11' => 'Standard',
         '12' => '3 Day Select',
         '13' => 'Next Day Air Saver',
         '14' => 'Next Day Air Early AM',
-        '59' => '2nd Day Air AM'
+        '59' => '2nd Day Air AM',
+        '65' => 'World Wide Saver',
     );
     
     /**
