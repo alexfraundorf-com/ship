@@ -50,10 +50,14 @@ class Ups implements ShipperInterface {
         '01' => 'Next Day Air',
         '02' => '2nd Day Air',
         '03' => 'Ground',
+        '07' => 'Worldwide Express',
+        '08' => 'Worldwide Expeditor',
+        '11' => 'Standard',
         '12' => '3 Day Select',
         '13' => 'Next Day Air Saver',
         '14' => 'Next Day Air Early AM',
-        '59' => '2nd Day Air AM'
+        '59' => '2nd Day Air AM',
+        '65' => 'World Wide Saver',
     );
     
     /**
@@ -191,7 +195,7 @@ class Ups implements ShipperInterface {
             $data['Dimensions']['Width'] = ceil($package->Get('width'));
             $data['Dimensions']['Height'] = ceil($package->Get('height'));
             // set the package's unit of weight (pounds are the default unit)
-            if($this->config['dimension_unit'] == 'KG') {
+            if($this->config['weight_unit'] == 'KG') {
                 $data['PackageWeight']['UnitOfMeasurement']['Code'] = 'KGS';
             }
             else {
