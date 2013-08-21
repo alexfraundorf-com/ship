@@ -1,15 +1,15 @@
 <?php
 /**
  * Shipping vendor class for UPS.
- * 
+ *
  * @package Awsp Shipping Package
  * @author Alex Fraundorf - AlexFraundorf.com
  * @copyright (c) 2012-2013, Alex Fraundorf and AffordableWebSitePublishing.com LLC
- * @version 04/19/2013 - NOTICE: This is beta software.  Although it has been tested, there may be bugs and 
+ * @version 04/19/2013 - NOTICE: This is beta software.  Although it has been tested, there may be bugs and
  *      there is plenty of room for improvement.  Use at your own risk.
  * @since 12/02/2012
  * @license MIT License http://www.opensource.org/licenses/mit-license.php
- * 
+ *
  * @copyright (c) UPS API, documentation and logos are the property of United Parcel Service.
  * @version This class uses the December 31, 2012 version of the UPS WebServices API
  * @link https://www.ups.com/upsdeveloperkit
@@ -17,31 +17,31 @@
 namespace Awsp\Ship;
 
 class Ups implements ShipperInterface {
-    
+
     /**
      *
      * @var array holder for config data (from includes/config.php)
      */
     protected $config = array();
-    
+
     /**
      *
      * @var string the array to be sent to the UPS API
      */
     protected $request = array();
-    
+
     /**
      *
      * @var string the URL to send the API request to (set by __construct)
      */
     protected $api_url = null;
-    
+
     /**
      *
      * @var object the Shipment object to process which contains Package object(s)
      */
     protected $Shipment = null;
-    
+
     /**
      *
      * @var array An array of UPS services.  The key is the service code and the value is the service description.
@@ -56,18 +56,19 @@ class Ups implements ShipperInterface {
         '12' => '3 Day Select',
         '13' => 'Next Day Air Saver',
         '14' => 'Next Day Air Early AM',
+        '54' => 'Worldwide Express Plus',
         '59' => '2nd Day Air AM',
         '65' => 'World Wide Saver',
     );
-    
+
     /**
      *
      * @var object the API call response object
      */
     protected $Response = null;
-    
-    
-    
+
+
+
     /**
      * Constructor function - sets object properties
      * @param object \Awsp\Ship\Shipment $Shipment the Shipment object which also contains Package object(s)
@@ -77,13 +78,13 @@ class Ups implements ShipperInterface {
      */
     public function __construct(Shipment $Shipment, array $config) {
         // set the config array property
-        $this->setConfig($config); 
+        $this->setConfig($config);
         // set the local reference of the Shipment object
         $this->setShipment($Shipment);
         // set the API URL based on production status
         if($config['production_status'] == true) {
             $this->api_url = $config['ups']['production_url'];
-        } 
+        }
         else {
             $this->api_url = $config['ups']['testing_url'];
         }
@@ -95,11 +96,11 @@ class Ups implements ShipperInterface {
         // UPS account number
         $this->request['Shipment']['Shipper']['ShipperNumber'] = $config['ups']['account_number'];
     }
-    
-    
+
+
     /**
      * Validate the config array and sets it as an object property
-     * 
+     *
      * @param array $config
      * @throws \InvalidArgumentException
      * @version 04/19/2013
@@ -113,11 +114,11 @@ class Ups implements ShipperInterface {
         // set the object config array
         $this->config = $config;
     }
-    
-    
+
+
     /**
      * Validate the Shipment object and sets it as an object property
-     * 
+     *
      * @param \Awsp\Ship\Shipment $config
      * @throws \InvalidArgumentException
      * @version 04/19/2013
@@ -131,12 +132,12 @@ class Ups implements ShipperInterface {
         // set the object property
         $this->Shipment = $Shipment;
     }
-    
-    
+
+
     /**
-     * Compiles the required information for obtaining a shipping rate quote into the UPS array and using sendRequest() 
+     * Compiles the required information for obtaining a shipping rate quote into the UPS array and using sendRequest()
      *      sends the request to the UPS API and returns a RateResponse object.
-     * 
+     *
      * @version updated 01/01/2013
      * @since 12/02/2012
      * @return object \Awsp\Ship\RateResponse
@@ -144,19 +145,19 @@ class Ups implements ShipperInterface {
      */
     public function getRate() {
         // set request array settings
-        
-        // return rates for all valid services     
+
+        // return rates for all valid services
         $this->request['Request']['RequestOption'] = 'Shop';
 
         // extract shipper information from the config array
         $this->request['Shipment']['Shipper']['Address']['PostalCode'] = $this->config['ups']['shipper_postal_code'];
         $this->request['Shipment']['Shipper']['Address']['CountryCode'] = $this->config['ups']['shipper_country_code'];
-        
+
         // check for a different shipping from location
         if($this->Shipment->get('ship_from_different_address') == true) {
-            $this->request['Shipment']['ShipFrom']['Address']['PostalCode'] = 
+            $this->request['Shipment']['ShipFrom']['Address']['PostalCode'] =
                     $this->Shipment->get('shipping_from_postal_code');
-            $this->request['Shipment']['ShipFrom']['Address']['CountryCode'] = 
+            $this->request['Shipment']['ShipFrom']['Address']['CountryCode'] =
                     $this->Shipment->get('shipping_from_country_code');
         }
 
@@ -169,7 +170,7 @@ class Ups implements ShipperInterface {
         if ($this->Shipment->get('receiver_is_residential') == true) {
             $this->request['Shipment']['ShipTo']['Address']['ResidentialAddressIndicator'] = '';
         }
-        
+
         // retrieve the packages array from the Shipment object
         $packages = $this->Shipment->getPackages();
         // loop through the packages and create required fields for them
@@ -207,7 +208,7 @@ class Ups implements ShipperInterface {
             // insurance
             if($package->getOption('insured_amount') != null) {
                 $data['PackageServiceOptions']['DeclaredValue']['CurrencyCode'] = $this->config['currency_code'];
-                $data['PackageServiceOptions']['DeclaredValue']['MonetaryValue'] = 
+                $data['PackageServiceOptions']['DeclaredValue']['MonetaryValue'] =
                     $package->getOption('insured_amount');
             }
             // signature required
@@ -215,11 +216,11 @@ class Ups implements ShipperInterface {
                 // use standard delivery confirmation, signature required
                 $data['PackageServiceOptions']['DeliveryConfirmation']['DCISType'] = '2';
             }
-            
+
             // add this package's data to the UPS packages array
             $this->request['Shipment']['Package'][] = $data;
         }
-        
+
         // build the task specific SOAP options
         // initialize the params array
         $params = array();
@@ -231,7 +232,7 @@ class Ups implements ShipperInterface {
         $params['url'] = $this->api_url . '/Rate';
         // send the SOAP request - returns a standard object
         $this->Response = $this->sendRequest($params);
-        
+
         // check on the response status
         $status = $this->getResponseStatus();
         // if there was an error, throw an exception
@@ -245,13 +246,13 @@ class Ups implements ShipperInterface {
         // return RateResponse object
         return $Response;
     }
-    
-    
+
+
     /**
-     * Compiles the required information for obtaining a shipping rate quote into the UPS array and using sendRequest() 
+     * Compiles the required information for obtaining a shipping rate quote into the UPS array and using sendRequest()
      *      sends the request to the UPS API and returns a RateResponse object.
 
-     * @param array $params parameters for label creation 
+     * @param array $params parameters for label creation
      *      string $params['service_code'] - the UPS code for the shipping service
      * @return object \Awsp\Ship\LabelResponse
      * @version updated 01/16/2013
@@ -268,44 +269,44 @@ class Ups implements ShipperInterface {
         $this->request['Shipment']['Shipper']['EMailAddress'] = $this->config['ups']['shipper_email'];
         $this->request['Shipment']['Shipper']['Address']['AddressLine'][] = $this->config['ups']['shipper_address1'];
         if($this->config['ups']['shipper_address2'] != null) {
-            $this->request['Shipment']['Shipper']['Address']['AddressLine'][] = 
+            $this->request['Shipment']['Shipper']['Address']['AddressLine'][] =
                     $this->config['ups']['shipper_address2'];
         }
         if($this->config['ups']['shipper_address3'] != null) {
-            $this->request['Shipment']['Shipper']['Address']['AddressLine'][] = 
+            $this->request['Shipment']['Shipper']['Address']['AddressLine'][] =
                     $this->config['ups']['shipper_address3'];
         }
         $this->request['Shipment']['Shipper']['Address']['City'] = $this->config['ups']['shipper_city'];
         $this->request['Shipment']['Shipper']['Address']['StateProvinceCode'] = $this->config['ups']['shipper_state'];
         $this->request['Shipment']['Shipper']['Address']['PostalCode'] = $this->config['ups']['shipper_postal_code'];
         $this->request['Shipment']['Shipper']['Address']['CountryCode'] = $this->config['ups']['shipper_country_code'];
-        
+
         // check for a different shipping from location
         if($this->Shipment->get('ship_from_different_address') == true) {
             $this->request['Shipment']['ShipFrom']['Name'] = $this->Shipment->get('shipping_from_name');
-            $this->request['Shipment']['ShipFrom']['AttentionName'] = 
+            $this->request['Shipment']['ShipFrom']['AttentionName'] =
                     $this->Shipment->get('shipping_from_attention_name');
             $this->request['Shipment']['ShipFrom']['Phone']['Number'] = $this->Shipment->get('shipping_from_phone');
             $this->request['Shipment']['ShipFrom']['EMailAddress'] = $this->Shipment->get('shipping_from_email');
-            $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] = 
+            $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] =
                     $this->Shipment->get('shipping_from_address1');
             if($this->Shipment->get('shipping_from_address2') != null) {
-                $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] = 
+                $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] =
                         $this->Shipment->get('shipping_from_address2');
             }
             if($this->Shipment->get('shipping_from_address3') != null) {
-                $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] = 
+                $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] =
                         $this->Shipment->get('shipping_from_address3');
             }
             $this->request['Shipment']['ShipFrom']['Address']['City'] = $this->Shipment->get('shipping_from_city');
-            $this->request['Shipment']['ShipFrom']['Address']['StateProvinceCode'] = 
+            $this->request['Shipment']['ShipFrom']['Address']['StateProvinceCode'] =
                     $this->Shipment->get('shipping_from_state');
-            $this->request['Shipment']['ShipFrom']['Address']['PostalCode'] = 
+            $this->request['Shipment']['ShipFrom']['Address']['PostalCode'] =
                     $this->Shipment->get('shipping_from_postal_code');
-            $this->request['Shipment']['ShipFrom']['Address']['CountryCode'] = 
+            $this->request['Shipment']['ShipFrom']['Address']['CountryCode'] =
                     $this->Shipment->get('shipping_from_country_code');
         }
-        
+
         // receiver information
         $this->request['Shipment']['ShipTo']['Name'] = $this->Shipment->get('receiver_name');
         $this->request['Shipment']['ShipTo']['AttentionName'] = $this->Shipment->get('receiver_attention_name');
@@ -313,11 +314,11 @@ class Ups implements ShipperInterface {
         $this->request['Shipment']['ShipTo']['EMailAddress'] = $this->Shipment->get('receiver_email');
         $this->request['Shipment']['ShipTo']['Address']['AddressLine'][] = $this->Shipment->get('receiver_address1');
         if($this->Shipment->get('receiver_address2') != null) {
-            $this->request['Shipment']['ShipTo']['Address']['AddressLine'][] = 
+            $this->request['Shipment']['ShipTo']['Address']['AddressLine'][] =
                     $this->Shipment->get('receiver_address2');
         }
         if($this->Shipment->get('receiver_address3') != null) {
-            $this->request['Shipment']['ShipTo']['Address']['AddressLine'][] = 
+            $this->request['Shipment']['ShipTo']['Address']['AddressLine'][] =
                     $this->Shipment->get('receiver_address3');
         }
         $this->request['Shipment']['ShipTo']['Address']['City'] = $this->Shipment->get('receiver_city');
@@ -328,24 +329,24 @@ class Ups implements ShipperInterface {
         if ($this->Shipment->get('receiver_is_residential') == true) {
             $this->request['Shipment']['ShipTo']['Address']['ResidentialAddressIndicator'] = '';
         }
-        
-        $this->request['Shipment']['PaymentInformation']['ShipmentCharge']['BillShipper']['AccountNumber'] = 
+
+        $this->request['Shipment']['PaymentInformation']['ShipmentCharge']['BillShipper']['AccountNumber'] =
                 $this->config['ups']['account_number'];
         $this->request['Shipment']['Service']['Code'] = $params['service_code'];
-        
+
         // billing for transportation charges
-        $this->request['Shipment']['PaymentInformation']['ShipmentCharge']['Type'] = '01'; 
-        
+        $this->request['Shipment']['PaymentInformation']['ShipmentCharge']['Type'] = '01';
+
         // set the return format of the image
         $this->request['Shipment']['LabelSpecification']['LabelImageFormat']['Code'] = 'GIF';
-        
+
         // use Quantum View Notify to email tracking number(s) to receiver
         if(($this->config['email_tracking_number_to_receiver'] == true) && ($this->Shipment->get('receiver_email') != null)) {
             $this->request['Shipment']['ShipmentServiceOptions']['Notification']['NotificationCode'] = '6';
-            $this->request['Shipment']['ShipmentServiceOptions']['Notification']['EMail']['EMailAddress'] = 
+            $this->request['Shipment']['ShipmentServiceOptions']['Notification']['EMail']['EMailAddress'] =
                     $this->Shipment->get('receiver_email');
         }
-        
+
         // retrieve the packages array from the Shipment object
         $packages = $this->Shipment->getPackages();
         // loop through the packages and create required fields for them
@@ -388,12 +389,12 @@ class Ups implements ShipperInterface {
             }
             // set the package's weight and round it up to the next whole number
             $data['PackageWeight']['Weight'] = ceil($package->Get('weight'));
-            
+
             // check for any package options
             // insurance
             if($package->getOption('insured_amount') != null) {
                 $data['PackageServiceOptions']['DeclaredValue']['CurrencyCode'] = $this->config['currency_code'];
-                $data['PackageServiceOptions']['DeclaredValue']['MonetaryValue'] = 
+                $data['PackageServiceOptions']['DeclaredValue']['MonetaryValue'] =
                     $package->getOption('insured_amount');
             }
             // signature required
@@ -401,11 +402,11 @@ class Ups implements ShipperInterface {
                 // use standard delivery confirmation, signature required
                 $data['PackageServiceOptions']['DeliveryConfirmation']['DCISType'] = '2';
             }
-            
+
             // add this package's data to the UPS packages array
             $this->request['Shipment']['Package'][] = $data;
         }
-        
+
         // build the task specific SOAP options
         // initialize the params array
         $params = array();
@@ -417,7 +418,7 @@ class Ups implements ShipperInterface {
         $params['url'] = $this->api_url . '/Ship';
         // send the SOAP request - returns a standard object
         $this->Response = $this->sendRequest($params);
-        
+
         // build parameter for RatesResponse object
         $status = $this->getResponseStatus();
         // if there was an error, throw an exception
@@ -433,12 +434,12 @@ class Ups implements ShipperInterface {
         // return LabelResponse object
         return $Response;
     }
-    
-    
+
+
     /**
      * Sends the SOAP request to the UPS API server and converts the response into a standard object.
-     * 
-     * @param array $params 
+     *
+     * @param array $params
      *      string $params['wsdl'] the absolute local path to the WSDL file
      *      string $params['operation'] the UPS operation keyword
      *      string $params['url'] the URL to send the request to
@@ -474,15 +475,15 @@ class Ups implements ShipperInterface {
             // extract the error details from SoapFault object
             $error_detail = serialize($e->detail->Errors->ErrorDetail);
             // rethrow a more useful exception message
-            throw new \Exception('UPS SOAP Request failed - ' . $e->getMessage() . ' - Serialized Details: ' 
+            throw new \Exception('UPS SOAP Request failed - ' . $e->getMessage() . ' - Serialized Details: '
                     . $error_detail);
         }
    }
-    
+
 
     /**
      * Extracts that status of the response and normalizes it.  Returns 'Success' or 'Error'
-     * 
+     *
      * @return string 'Success' or 'Error'
      * @version updated 12/09/2012
      * @since 12/08/2012
@@ -498,11 +499,11 @@ class Ups implements ShipperInterface {
             return 'Error';
         }
     }
-    
-    
+
+
     /**
      * Extracts any UPS service messages from the SOAP response object
-     * 
+     *
      * @param type $messages the alert section of the SOAP response object
      * @return array of any messages
      * @version updated 12/09/2012
@@ -528,11 +529,11 @@ class Ups implements ShipperInterface {
         // return the completed array
         return $output;
     }
-    
-    
+
+
     /**
      * Extracts and returns rates for the services from the SOAP response object
-     * 
+     *
      * @return array a multi-dimensional array containing the rate data for each service
      * @throws \UnexpectedValueException
      * @version updated 12/09/2012
@@ -567,11 +568,11 @@ class Ups implements ShipperInterface {
         // return the completed array
         return $output;
     }
-    
-    
+
+
     /**
      * Extracts the data for a single rate service (used by getResponseRates)
-     * 
+     *
      * @param object $rate is an object containing data for a single rate service
      * @return array containing the extracted data
      * @version updated 12/09/2012
@@ -590,11 +591,11 @@ class Ups implements ShipperInterface {
         $array['package_count'] = count($array['packages']);
         return $array;
     }
-    
-    
+
+
     /**
      * Extracts rate details for each package in the shipment
-     * 
+     *
      * @param array|object $packages data about the package(s) from the SOAP response
      * @return array
      * @throws \UnexpectedValueException
@@ -624,11 +625,11 @@ class Ups implements ShipperInterface {
         // return the completed array
         return $output;
     }
-    
+
 
     /**
      * Extracts the details for a single package (used by getPackageRateDetails)
-     * 
+     *
      * @param object $package is an object containing data for a single package
      * @return array containing the extracted data
      * @version updated 12/09/2012
@@ -654,11 +655,11 @@ class Ups implements ShipperInterface {
             );
         return $array;
     }
-    
-    
+
+
     /**
      * Extract the total cost of the shipping label(s) from the SOAP response
-     * 
+     *
      * @return string the cost of the shipping label(s)
      * @version updated 01/08/2013
      * @since 01/08/2013
@@ -666,11 +667,11 @@ class Ups implements ShipperInterface {
     protected function getResponseLabelTotalCost() {
         return $this->Response->enc_value->ShipmentResults->ShipmentCharges->TotalCharges->MonetaryValue;
     }
-    
-    
+
+
     /**
      * Extracts the label(s) information from the SOAP response object
-     * 
+     *
      * @return array with the label(s) data
      * @throws \UnexpectedValueException
      * @version updated 01/08/2013
@@ -700,11 +701,11 @@ class Ups implements ShipperInterface {
         // return the labels array
         return $output;
     }
-    
-    
+
+
     /**
      * Extracts the data for an individual label from the SOAP response object (used by getResponseLabels)
-     * 
+     *
      * @return array with the label's data
      * @version updated 01/17/2013
      * @since 01/08/2013
@@ -720,5 +721,5 @@ class Ups implements ShipperInterface {
         return $array;
     }
 
-    
+
 }
