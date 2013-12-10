@@ -5,7 +5,7 @@
  * @package Awsp Shipping Package
  * @author Alex Fraundorf - AlexFraundorf.com
  * @copyright (c) 2012-2013, Alex Fraundorf and AffordableWebSitePublishing.com LLC
- * @version 04/19/2013 - NOTICE: This is beta software.  Although it has been tested, there may be bugs and 
+ * @version 12/09/2013 - NOTICE: This is beta software.  Although it has been tested, there may be bugs and 
  *      there is plenty of room for improvement.  Use at your own risk.
  * @since 12/02/2012
  * @license MIT License http://www.opensource.org/licenses/mit-license.php
@@ -281,31 +281,63 @@ class Ups implements ShipperInterface {
         $this->request['Shipment']['Shipper']['Address']['CountryCode'] = $this->config['ups']['shipper_country_code'];
         
         // check for a different shipping from location
+        // Set Shipment/ShipFrom values and override Ship/Shipper/Address values
         if($this->Shipment->get('ship_from_different_address') == true) {
+            // name
             $this->request['Shipment']['ShipFrom']['Name'] = $this->Shipment->get('shipping_from_name');
+            $this->request['Shipment']['Shipper']['Name'] = $this->Shipment->get('shipping_from_name');
+            // attention            
             $this->request['Shipment']['ShipFrom']['AttentionName'] = 
                     $this->Shipment->get('shipping_from_attention_name');
+            $this->request['Shipment']['Shipper']['AttentionName'] = 
+                    $this->Shipment->get('shipping_from_attention_name');
+            // phone            
             $this->request['Shipment']['ShipFrom']['Phone']['Number'] = $this->Shipment->get('shipping_from_phone');
+            $this->request['Shipment']['Shipper']['Phone']['Number'] = $this->Shipment->get('shipping_from_phone');
+            // email
             $this->request['Shipment']['ShipFrom']['EMailAddress'] = $this->Shipment->get('shipping_from_email');
+            $this->request['Shipment']['Shipper']['EMailAddress'] = $this->Shipment->get('shipping_from_email');
+            // address 1
             $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] = 
                     $this->Shipment->get('shipping_from_address1');
+            // clear out this array to remove any information from the shipper info
+            $this->request['Shipment']['Shipper']['Address']['AddressLine'] = null;
+            $this->request['Shipment']['Shipper']['Address']['AddressLine'][] = 
+                    $this->Shipment->get('shipping_from_address1');
+            // address 2
             if($this->Shipment->get('shipping_from_address2') != null) {
                 $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] = 
                         $this->Shipment->get('shipping_from_address2');
+                $this->request['Shipment']['Shipper']['Address']['AddressLine'][] = 
+                        $this->Shipment->get('shipping_from_address2');
             }
+            // address 3
             if($this->Shipment->get('shipping_from_address3') != null) {
                 $this->request['Shipment']['ShipFrom']['Address']['AddressLine'][] = 
                         $this->Shipment->get('shipping_from_address3');
+                $this->request['Shipment']['Shipper']['Address']['AddressLine'][] = 
+                        $this->Shipment->get('shipping_from_address3');
             }
+            // city
             $this->request['Shipment']['ShipFrom']['Address']['City'] = $this->Shipment->get('shipping_from_city');
+            $this->request['Shipment']['Shipper']['Address']['City'] = $this->Shipment->get('shipping_from_city');
+            // state/province            
             $this->request['Shipment']['ShipFrom']['Address']['StateProvinceCode'] = 
                     $this->Shipment->get('shipping_from_state');
+            $this->request['Shipment']['Shipper']['Address']['StateProvinceCode'] = 
+                    $this->Shipment->get('shipping_from_state');
+            // postal code
             $this->request['Shipment']['ShipFrom']['Address']['PostalCode'] = 
                     $this->Shipment->get('shipping_from_postal_code');
+            $this->request['Shipment']['Shipper']['Address']['PostalCode'] = 
+                    $this->Shipment->get('shipping_from_postal_code');
+            // country code
             $this->request['Shipment']['ShipFrom']['Address']['CountryCode'] = 
                     $this->Shipment->get('shipping_from_country_code');
+            $this->request['Shipment']['Shipper']['Address']['CountryCode'] = 
+                    $this->Shipment->get('shipping_from_country_code');
         }
-        
+
         // receiver information
         $this->request['Shipment']['ShipTo']['Name'] = $this->Shipment->get('receiver_name');
         $this->request['Shipment']['ShipTo']['AttentionName'] = $this->Shipment->get('receiver_attention_name');
