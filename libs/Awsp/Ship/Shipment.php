@@ -38,7 +38,7 @@ class Shipment {
     public function __construct(array $shipment_data = array()) {
         // set object properties
         if(!is_array($shipment_data) || empty($shipment_data)) {
-            throw new \Awsp\FW\InvalidArgumentException('Shipment Data array is empty.');
+            throw new \InvalidArgumentException('Shipment Data array is empty.');
         }
         $this->shipment_data = $shipment_data;
         // sanitize $shipment_data values
