@@ -1,3 +1,9 @@
+03/30/2014 Stay tuned.  A new and improved version of this module is coming in the next few weeks!
+
+
+
+
+
 Copyright (c) 2012-2013 Alex Fraundorf and AffordableWebSitePublishing.com LLC
 
 This readme file was updated on 04/24/2013.
