@@ -1,4 +1,4 @@
-03/30/2014 Stay tuned.  A new and improved version of this module is coming in the next few weeks!
+-- Stay tuned.  A new and improved version of this module is coming soon!
 
 
 
